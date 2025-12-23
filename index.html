@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To DingDing from FX</title>
-    <!-- 引入Google Fonts的花体字体 -->
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -16,7 +15,7 @@
             height: 100vh;
             background-color: #ffffff;
             overflow: hidden;
-            font-family: 'Dancing Script', cursive; /* 修改为花体字体 */
+            font-family: 'Dancing Script', cursive;
         }
         .container {
             position: relative;
@@ -33,33 +32,64 @@
             color: #FF69B4;
             text-align: center;
             font-weight: bold;
-            font-size: 24px; /* 增大字体大小以适应花体 */
+            font-size: 26px;
             line-height: 1.5;
             pointer-events: none;
-            text-shadow: 0 0 5px rgba(255, 105, 180, 0.8);
+            text-shadow: 0 0 5px rgba(255, 105, 180, 0.5);
             white-space: pre-line;
-            font-family: 'Dancing Script', cursive; /* 修改为花体字体 */
         }
+
+        /* 控制区容器 */
         .controls {
             position: absolute;
-            bottom: 60px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
+            flex-direction: column;
             align-items: center;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 10px 15px;
-            border-radius: 20px;
+            gap: 15px;
             z-index: 10;
-            font-family: 'Dancing Script', cursive; /* 修改为花体字体 */
         }
-        .controls label {
+
+        /* 圣诞按钮样式 */
+        .christmas-btn {
+            background-color: #FF69B4;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-family: 'Dancing Script', cursive;
+            font-size: 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .christmas-btn:hover {
+            transform: scale(1.1);
+            background-color: #ff4da6;
+            box-shadow: 0 6px 20px rgba(255, 105, 180, 0.6);
+        }
+
+        /* 速度调节面板样式 */
+        .speed-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(255, 105, 180, 0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 105, 180, 0.3);
+        }
+        .speed-panel label {
             color: #FF69B4;
-            margin-right: 10px;
-            font-size: 18px; /* 增大字体大小以适应花体 */
+            margin-bottom: 5px;
+            font-size: 16px;
         }
-        .controls input {
-            width: 150px;
+        input[type=range] {
+            width: 120px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -67,14 +97,23 @@
     <div class="container">
         <canvas id="heartCanvas"></canvas>
         <div id="message" class="message"></div>
+
         <div class="controls">
-            <label for="frequency">Heart Rate:</label>
-            <input type="range" id="frequency" min="0.1" max="2" step="0.1" value="1">
+            <button class="christmas-btn" onclick="goToChristmas()">Merry Christmas!</button>
+
+            <div class="speed-panel">
+                <label for="frequency">Beat Speed</label>
+                <input type="range" id="frequency" min="0.2" max="1.5" step="0.1" value="0.4">
+            </div>
         </div>
     </div>
 
     <script>
-        // 常量定义
+        // 跳转函数：请修改下面的 URL 为你的圣诞网页地址
+        function goToChristmas() {
+            window.location.href = "Christmas-line.html"; // 这里替换成你的圣诞页面链接
+        }
+
         const CANVAS_WIDTH = 1080;
         const CANVAS_HEIGHT = 840;
         const CANVAS_CENTER_X = CANVAS_WIDTH / 2;
@@ -82,23 +121,17 @@
         const IMAGE_ENLARGE = 11;
         const HEART_COLOR = "#FF69B4";
 
-        // 设置开始日期（修改为你们的开始日期和时间）
-        const START_DATETIME = new Date(2025, 6, 15, 22, 0, 0); // 注意：月份是从0开始的，所以7月是6
+        const START_DATETIME = new Date(2025, 6, 15, 22, 0, 0);
 
-        // 获取Canvas和上下文
         const canvas = document.getElementById('heartCanvas');
         const ctx = canvas.getContext('2d');
         const messageElement = document.getElementById('message');
         const frequencySlider = document.getElementById('frequency');
 
-        // 设置Canvas尺寸
         canvas.width = CANVAS_WIDTH;
         canvas.height = CANVAS_HEIGHT;
 
-        // 频率控制参数
         let frequency = 1;
-
-        // 监听频率滑块变化
         frequencySlider.addEventListener('input', function() {
             frequency = parseFloat(this.value);
         });
@@ -106,47 +139,28 @@
         function getTimeTogether() {
             const now = new Date();
             const delta = now - START_DATETIME;
-
-            // 计算天数、小时、分钟、秒数
             const days = Math.floor(delta / (1000 * 60 * 60 * 24));
             const hours = Math.floor((delta % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((delta % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((delta % (1000 * 60)) / 1000);
-
             return { days, hours, minutes, seconds };
         }
 
         function heartFunction(t, shrinkRatio = IMAGE_ENLARGE) {
-            // 基础函数
             const x = 16 * (Math.sin(t) ** 3);
             const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-
-            // 缩放
-            const scaledX = x * shrinkRatio;
-            const scaledY = y * shrinkRatio;
-
-            // 移到画布中央
-            const finalX = scaledX + CANVAS_CENTER_X;
-            const finalY = scaledY + CANVAS_CENTER_Y;
-
-            return [finalX, finalY];
+            return [x * shrinkRatio + CANVAS_CENTER_X, y * shrinkRatio + CANVAS_CENTER_Y];
         }
 
         function scatterInside(x, y, beta = 0.15) {
             const ratioX = -beta * Math.log(Math.random());
             const ratioY = -beta * Math.log(Math.random());
-
-            const dx = ratioX * (x - CANVAS_CENTER_X);
-            const dy = ratioY * (y - CANVAS_CENTER_Y);
-
-            return [x - dx, y - dy];
+            return [x - ratioX * (x - CANVAS_CENTER_X), y - ratioY * (y - CANVAS_CENTER_Y)];
         }
 
         function shrink(x, y, ratio) {
             const force = -1 / (((x - CANVAS_CENTER_X) ** 2 + (y - CANVAS_CENTER_Y) ** 2) ** 0.6);
-            const dx = ratio * force * (x - CANVAS_CENTER_X);
-            const dy = ratio * force * (y - CANVAS_CENTER_Y);
-            return [x - dx, y - dy];
+            return [x - ratio * force * (x - CANVAS_CENTER_X), y - ratio * force * (y - CANVAS_CENTER_Y)];
         }
 
         function curve(p) {
@@ -159,25 +173,19 @@
                 this._edgeDiffusionPoints = new Set();
                 this._centerDiffusionPoints = new Set();
                 this.allPoints = {};
-                this.build(2000);
-
-                this.randomHalo = 1000;
                 this.generateFrame = generateFrame;
-
+                this.build(2000);
                 for (let frame = 0; frame < generateFrame; frame++) {
                     this.calc(frame);
                 }
             }
 
             build(number) {
-                // 爱心
                 for (let i = 0; i < number; i++) {
                     const t = Math.random() * 2 * Math.PI;
                     const [x, y] = heartFunction(t);
                     this._points.add(`${x},${y}`);
                 }
-
-                // 爱心内扩散
                 const pointsArray = Array.from(this._points);
                 for (const point of pointsArray) {
                     const [x, y] = point.split(',').map(Number);
@@ -186,7 +194,6 @@
                         this._edgeDiffusionPoints.add(`${newX},${newY}`);
                     }
                 }
-
                 for (let i = 0; i < 4000; i++) {
                     const randomPoint = pointsArray[Math.floor(Math.random() * pointsArray.length)];
                     const [x, y] = randomPoint.split(',').map(Number);
@@ -202,91 +209,65 @@
                 return [x - dx, y - dy];
             }
 
-            calc(generateFrame) {
-                const ratio = 10 * curve(generateFrame / 10 * Math.PI);
-                const haloRadius = parseInt(4 + 6 * (1 + curve(generateFrame / 10 * Math.PI)));
-                const haloNumber = parseInt(3000 + 4000 * Math.abs(curve(generateFrame / 10 * Math.PI) ** 2));
-
+            calc(frameIndex) {
+                const ratio = 10 * curve(frameIndex / 10 * Math.PI);
+                const haloRadius = parseInt(4 + 6 * (1 + curve(frameIndex / 10 * Math.PI)));
+                const haloNumber = parseInt(3000 + 4000 * Math.abs(curve(frameIndex / 10 * Math.PI) ** 2));
                 const allPoints = [];
-
-                // 光环
                 const heartHaloPoint = new Set();
                 for (let i = 0; i < haloNumber; i++) {
                     const t = Math.random() * 2 * Math.PI;
                     let [x, y] = heartFunction(t, 11.6);
                     [x, y] = shrink(x, y, haloRadius);
-
                     if (!heartHaloPoint.has(`${x},${y}`)) {
                         heartHaloPoint.add(`${x},${y}`);
                         x += Math.random() * 28 - 14;
                         y += Math.random() * 28 - 14;
-                        const size = [1, 2, 2][Math.floor(Math.random() * 3)];
-                        allPoints.push([x, y, size]);
+                        allPoints.push([x, y, [1, 2, 2][Math.floor(Math.random() * 3)]]);
                     }
                 }
-
-                // 轮廓
                 for (const point of this._points) {
                     const [x, y] = point.split(',').map(Number);
                     const [newX, newY] = this.calcPosition(x, y, ratio);
-                    const size = Math.floor(Math.random() * 3) + 1;
-                    allPoints.push([newX, newY, size]);
+                    allPoints.push([newX, newY, Math.floor(Math.random() * 3) + 1]);
                 }
-
-                // 内容
                 for (const point of this._edgeDiffusionPoints) {
                     const [x, y] = point.split(',').map(Number);
                     const [newX, newY] = this.calcPosition(x, y, ratio);
-                    const size = Math.floor(Math.random() * 2) + 1;
-                    allPoints.push([newX, newY, size]);
+                    allPoints.push([newX, newY, Math.floor(Math.random() * 2) + 1]);
                 }
-
                 for (const point of this._centerDiffusionPoints) {
                     const [x, y] = point.split(',').map(Number);
                     const [newX, newY] = this.calcPosition(x, y, ratio);
-                    const size = Math.floor(Math.random() * 2) + 1;
-                    allPoints.push([newX, newY, size]);
+                    allPoints.push([newX, newY, Math.floor(Math.random() * 2) + 1]);
                 }
-
-                this.allPoints[generateFrame] = allPoints;
+                this.allPoints[frameIndex] = allPoints;
             }
 
             render(renderFrame) {
                 const framePoints = this.allPoints[renderFrame % this.generateFrame];
+                ctx.fillStyle = HEART_COLOR;
                 for (const [x, y, size] of framePoints) {
-                    ctx.fillStyle = HEART_COLOR;
                     ctx.fillRect(x, y, size, size);
                 }
             }
         }
 
-        // 创建爱心实例
         const heart = new Heart();
-
         let lastTime = 0;
-        let renderFrame = 0;
+        let frameProgress = 0;
 
         function draw(currentTime) {
-            // 计算时间差，应用频率控制
             if (!lastTime) lastTime = currentTime;
             const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
 
-            // 根据频率调整帧率
-            if (deltaTime > 1000 / (30 * frequency)) {
-                // 清空画布
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            frameProgress += (deltaTime * 0.03) * frequency;
+            heart.render(Math.floor(frameProgress));
 
-                // 渲染爱心
-                heart.render(renderFrame);
-
-                // 更新时间显示
-                const { days, hours, minutes, seconds } = getTimeTogether();
-                messageElement.textContent = `For you, a thousand times over.\n${days}:${hours}:${minutes}:${seconds}`;
-
-                // 增加下一帧
-                renderFrame++;
-                lastTime = currentTime;
-            }
+            const { days, hours, minutes, seconds } = getTimeTogether();
+            messageElement.textContent = `For you, a thousand times over.\n${days} Days ${hours}h ${minutes}m ${seconds}s`;
 
             requestAnimationFrame(draw);
         }
